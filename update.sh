@@ -78,7 +78,7 @@ if [ -n "${DELLIST}" ]; then
                 for j in ${DELUSER}; do
                     DELCOUNT=$(( DELCOUNT + 1 ))
                     echo "Removing: ${j} <${i}> (${DELCOUNT})"
-                    grep -v "^addauth ${j} " "${AUTHTEMP}" > "${AUTTEMP}.int"
+                    grep -v "^addauth ${j} " "${AUTHTEMP}" > "${AUTHTEMP}.int"
                     mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
                     grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
                     mv -f "${ACTVFILE}.int" "${ACTVFILE}"
@@ -100,6 +100,7 @@ if [ -n "${DELLIST}" ]; then
 fi
 
 ADDCOUNT=0
+PRGCOUNT=0
 if [ -e "${ADDUFILE}" ]; then
     a=`cat "${ADDUFILE}"`
     if [ -n "${a}" ]; then
@@ -109,17 +110,39 @@ if [ -e "${ADDUFILE}" ]; then
         done
     fi
     if [ ${#ADDINPUT[@]} != 0 ]; then
-        echo "Processing addition requests..."
         for v in ${!ADDINPUT[@]}; do
             ADDLINE="${ADDINPUT[v]}"
             if [ -n "${ADDLINE}" ]; then
                 ADDMAIL=`echo "${ADDLINE}" | cut -d" " -f1`
                 ADDUSER=`echo "${ADDLINE}" | cut -d" " -f2`
-                echo -n "Checking: ${ADDUSER} <${ADDMAIL}> "
+                ADDFLAG=`echo "${ADDLINE}" | cut -d" " -f3`
+                if [ -z "${ADDFLAG}" ]; then
+                    ADDFLAG="u"
+                fi
+                echo -n "Checking: ${ADDUSER} (${ADDFLAG}) <${ADDMAIL}> "
                 ADDFIND=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}"`
                 if [ -n "${ADDFIND}" ]; then
-                    echo "[email exists, skipping]"
-                    sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/exists" | ${SENDMAIL} "${ADDMAIL}"
+                    ADDCHECK=`echo "${ADDFIND}" | cut -d" " -f3 | tail -n 1`;
+                    ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
+                    if [ -n "${ADDCHECK}" ] && [ "${ADDCHECK}" != "${ADDFLAG}" ]; then
+                        PRGCOUNT=$(( PRGCOUNT + 1 ))
+                        echo "[flag updates: ${ADDCHECK} to ${ADDFLAG}]"
+                        grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
+                        mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
+                        grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${UPDTEMP}/virt.int"
+                        mv -f "${UPDTEMP}/virt.int" "${VIRTFILE}"
+                        ADDPURGE=`echo "${ADDFIND}" | cut -d" " -f2 | tr "\n" " "`
+                        for j in ${ADDPURGE}; do
+                            grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
+                            mv -f "${ACTVFILE}.int" "${ACTVFILE}"
+                        done
+                        echo "addauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
+                        echo "${ADDUSER}@redeclipse.net ${ADDMAIL}" >> "${VIRTFILE}"
+                        echo "${ADDUSER}" >> "${ACTVFILE}"
+                    else
+                        echo "[email exists, skipping]"
+                        sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/exists" | ${SENDMAIL} "${ADDMAIL}"
+                    fi
                 else
                     ADDFIND=`grep "^addauth ${ADDUSER} " "${AUTHTEMP}"`
                     if [ -n "${ADDFIND}" ]; then
@@ -142,7 +165,7 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDUKEY=`echo "${ADDKEYS}" | cut -d" " -f1`
                     ADDSKEY=`echo "${ADDKEYS}" | cut -d" " -f2`
                     echo "[generated keys]"
-                    echo "addauth ${ADDUSER} u ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
+                    echo "addauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
                     sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~USERKEY~/${ADDUKEY}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/reply" | ${SENDMAIL} "${ADDMAIL}"
                     ADDCOUNT=$(( ADDCOUNT + 1 ))
                 fi
@@ -193,7 +216,7 @@ if [ -n "${USERLIST}" ]; then
     fi
 fi
 
-if [ "${DELCOUNT}" -gt "0" ] || [ "${USERCOUNT}" -gt 0 ]; then
+if [ "${DELCOUNT}" -gt "0" ] || [ "${PRGCOUNT}" -gt "0" ] || [ "${USERCOUNT}" -gt 0 ]; then
     /usr/sbin/postmap "${VIRTFILE}" && /usr/sbin/postfix reload
 fi
 
