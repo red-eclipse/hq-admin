@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Red Eclipse HQ Admin Area"
+AuthUserFile /var/lib/reauth/htpasswd
+Require valid-user

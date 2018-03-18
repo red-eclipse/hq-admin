@@ -1,0 +1,64 @@
+MIME-Version: 1.0 
+From: Red Eclipse Team <contact@redeclipse.net> 
+To: ~USERNAME~ <~USERMAIL~> 
+Subject: Red Eclipse Account Application: ~USERNAME~
+Content-type: multipart/alternative; boundary="~BOUNDARY~" 
+
+--~BOUNDARY~
+Content-type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
+
+Hi there, here is your handle and user key for Red Eclipse ( https://redeclipse.net/ ). It will provide you with *player* status on all servers. Server owners may also add you to their localop user list to give you extra privileges with it.
+
+Please add the following line to your 'autoexec.cfg':
+
+- authkey ~USERNAME~ ~USERKEY~
+
+If you do not know where to find this file, please see our guide ( http://redeclipse.net/wiki/Game_Settings ). If the file does not exist, you should create it. Alternatively, you can enter your handle and user key in the profile menu of your Red Eclipse client.
+
+Please be advised that any *bouncing emails* will result in *account deletion*. We will only send user key resets to the original email address.
+
+All Red Eclipse users also have a *free forwarding email address* so everyone can easily contact people they meet in-game. Emails to ~USERNAME~@redeclipse.net will be forwarded to your email address: ~USERMAIL~.
+
+While we don't offer a mail server, you can send mail using this address if your provider supports "send as". Here are guides for some of the more popular services:
+
+- Google: https://support.google.com/mail/answer/22370?hl=en
+- Microsoft: https://support.microsoft.com/en-us/help/12407/microsoft-account-manage-aliases
+- Yahoo: https://help.yahoo.com/kb/SLN26524.html
+
+If you have any questions, or you want to join the community, visit our Live Chat ( https://redeclipse.net/chat ) on 'chat.freenode.net' in '#redeclipse', join in on our Discussions ( https://redeclipse.net/discuss ), or email contact@redeclipse.net.
+
+Enjoy the game!
+
+Red Eclipse Team | https://redeclipse.net/ | contact@redeclipse.net
+
+--~BOUNDARY~
+Content-type: text/html; charset="UTF-8"; format=flowed; delsp=yes
+
+<p>Hi there, here is your <b><i>handle</i></b> and <b><i>user key</b></i> for <b><a href="https://redeclipse.net/">Red Eclipse</a></b>. It will provide you with <b>player</b> status on all servers. Server owners may also add you to their localop user list to give you extra privileges with it.</p>
+
+<p>
+    Please add the following line to your <b>'autoexec.cfg'</b>:
+    <ul><li>authkey ~USERNAME~ ~USERKEY~</li></ul>
+</p>
+
+<p>If you do not know where to find this file, please see our <b><a href="http://redeclipse.net/wiki/Game_Settings">guide</a></b>. If the file does not exist, you should create it. Alternatively, you can enter your handle and user key in the profile menu of your Red Eclipse client.</p>
+
+<p>Please be advised that any <b>bouncing emails</b> will result in <b>account deletion</b>. We will only send user key resets to the original email address.</b></p>
+
+<p>All Red Eclipse users also have a <b>free forwarding email address</b> so everyone can easily contact people they meet in-game. Emails to <b><a href="mailto:~USERNAME~@redeclipse.net">~USERNAME~@redeclipse.net</a></b> will be forwarded to your email address: <b><a href="mailto:~USERMAIL~">~USERMAIL~</a></b>.</p>
+
+<p>
+    While we don't offer a mail server, you can send mail using this address if your provider supports <i>"send as"</i>. Here are guides for some of the more popular services:
+    <ul>
+        <li><b>Google</b>: <a href="https://support.google.com/mail/answer/22370?hl=en">https://support.google.com/mail/answer/22370?hl=en</a></li>
+        <li><b>Microsoft</b>: <a href="https://support.microsoft.com/en-us/help/12407/microsoft-account-manage-aliases">https://support.microsoft.com/en-us/help/12407/microsoft-account-manage-aliases</a></li>
+        <li><b>Yahoo</b>: <a href="https://help.yahoo.com/kb/SLN26524.html">https://help.yahoo.com/kb/SLN26524.html</a></li>
+    </ul>
+</p>
+
+<p>If you have any questions, or you want to join the community, visit our <b><a href="https://redeclipse.net/chat">Live Chat</a></b> on <a href="irc://chat.freenode.net/redeclipse"><b>chat.freenode.net</b> in <b>#redeclipse</b></a>, join in on our <b><a href="https://redeclipse.net/discuss">Discussions</a></b>, or email <b><a href="mailto:contact@redeclipse.net">contact@redeclipse.net</a></b>.</p>
+
+<p>Enjoy the game!</p>
+
+<p><b>Red Eclipse Team | <a href="https://redeclipse.net/">https://redeclipse.net/</a> | <a href="mailto:contact@redeclipse.net">contact@redeclipse.net</b></p>
+

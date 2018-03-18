@@ -1,0 +1,6 @@
+temp/*
+active.cfg
+auth.cfg
+htpasswd
+private.sh
+
