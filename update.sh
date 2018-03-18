@@ -122,11 +122,12 @@ if [ -e "${ADDUFILE}" ]; then
                 echo -n "Checking: ${ADDUSER} (${ADDFLAG}) <${ADDMAIL}> "
                 ADDFIND=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}"`
                 if [ -n "${ADDFIND}" ]; then
-                    ADDCHECK=`echo "${ADDFIND}" | cut -d" " -f3 | tail -n 1`;
+                    ADDCHKUSER=`echo "${ADDFIND}" | cut -d" " -f2 | tail -n 1`;
+                    ADDCHKFLAG=`echo "${ADDFIND}" | cut -d" " -f3 | tail -n 1`;
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
-                    if [ -n "${ADDCHECK}" ] && [ "${ADDCHECK}" != "${ADDFLAG}" ]; then
+                    if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        echo "[flag updates: ${ADDCHECK} to ${ADDFLAG}]"
+                        echo "[update: ${ADDCHKUSER} => ${ADDUSER} flags: ${ADDCHKFLAG} => ${ADDFLAG}]"
                         grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
                         mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
                         grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${UPDTEMP}/virt.int"
