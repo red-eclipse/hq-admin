@@ -16,8 +16,8 @@
                 echo "<td>" . $user[2]. "</td>";
                 echo "<td><a href=\"mailto:" . $user[4] . "\">" . $user[4]. "</td>";
                 echo "<td>";
-                echo "<a href=\"adduser.php?mail=" . $user[4] ."&user=" . $user[1] ."\">Modify User</a>";
-                echo " | <a href=\"deluser.php?mail=" . $user[4] ."\">Delete User</a>";
+                echo "<a href=\"adduser.php?mail=" . $user[4] . "&user=" . $user[1] . "&flag=" . $user[2] . "\">Modify User</a>";
+                echo " | <a href=\"deluser.php?mail=" . $user[4] . "\">Delete User</a>";
                 echo "</td>";
                 echo "</tr>\n";
                 $index = $index + 1;

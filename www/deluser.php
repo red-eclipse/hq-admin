@@ -19,6 +19,6 @@
 ?>
 <form>
     <p><tt>MAIL:</tt> <input type="text" name="mail" value="<?php echo $usermail; ?>"></p>
-    <p><tt>DONE:</tt> <input type="submit" value="Schedule User Deletion"></p>
+    <p><tt>DONE:</tt> <input type="submit" value="Confirm Submission"></p>
 </form>
 <?php include_once("/var/www/src/footer.php"); ?>

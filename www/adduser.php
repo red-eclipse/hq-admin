@@ -18,7 +18,7 @@
                 echo "<p><tt>&nbsp;&nbsp;OK:</tt> Username <b>'" . $username . "'</b> is <b>VALID</b>.</p>";
                 echo "<p><tt>&nbsp;&nbsp;OK:</tt> Flag(s) <b>'" . $userflag . "'</b> are set.</p>";
                 if ($issubmit != "") {
-                    $execstr = shell_exec("echo '" . escapeshellcmd($usermail) . " " . escapeshellcmd($username) . " " . escapeshellcmd($userflag) ."' >> /var/lib/reauth/temp/adduser.cfg && echo 'OK, submitted user addition successfully.' || echo 'FAILED, try again later.'");
+                    $execstr = shell_exec("echo '" . escapeshellcmd($usermail) . " " . escapeshellcmd($username) . " " . escapeshellcmd($userflag) ."' >> /var/lib/reauth/temp/adduser.cfg && echo 'OK, submitted user successfully.' || echo 'FAILED, try again later.'");
                     echo "<p><tt>&nbsp;RET:</tt> <b>" . $execstr . "</b></p>";
                 } else {
 ?>
@@ -26,7 +26,7 @@
                         <p><input type="hidden" name="mail" value="<?php echo $usermail; ?>"></p>
                         <p><input type="hidden" name="user" value="<?php echo $username; ?>"></p>
                         <p><input type="hidden" name="flag" value="<?php echo $userflag; ?>"></p>
-                        <p><tt>CONF:</tt> <input type="submit" name="submit" value="Confirm User Addition"></p>
+                        <p><tt>CONF:</tt> <input type="submit" name="submit" value="Confirm Submission"></p>
                     </form>
 <?php           }
             } else {
