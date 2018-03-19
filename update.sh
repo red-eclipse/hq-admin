@@ -128,7 +128,7 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
                     if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        echo "[update: ${ADDCHKUSER} => ${ADDUSER} flags: ${ADDCHKFLAG} => ${ADDFLAG}]"
+                        echo "[update: ${ADDCHKUSER} -> ${ADDUSER} flags: ${ADDCHKFLAG} -> ${ADDFLAG}]"
                         grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
                         mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
                         grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${VIRTTEMP}.int"

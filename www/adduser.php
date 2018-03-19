@@ -11,16 +11,17 @@
     $username = $_GET['user'] ?? "";
     $issubmit = $_GET['submit'] ?? "";
     if ($usermail != "" && $username != "") {
-        $userflag = $_GET['flag'] ?? "";
-        if ($userflag == "") $userflag = "u";
         echo "<h3>Processing</h3>";
         if (preg_match("/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i", $usermail)) {
             echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Email <b><tt>'" . $usermail . "'</tt></b> is <b>valid</b>.</p>";
             if (preg_match("/^[a-z][a-z0-9]+$/", $username)) {
                 $userinfo = find_user_by_mail($usermail);
+                $userflag = $_GET['flag'] ?? "";
                 if (!is_null($userinfo)) {
                     echo "<p><tt>&nbsp;&nbsp;USER:</tt> Found existing user <b><tt>'" . $userinfo[1] . "'</tt></b> with flags <b><tt>'" . $userinfo[2] . "'</tt></b> in the database.</p>";
+                    if ($userflag == "") $userflag = $userinfo[2];
                 }
+                elseif ($userflag == "") $userflag = "u";
                 $usernamediff = !is_null($userinfo) && $username == $userinfo[1] ? "matches" : "differs from";
                 echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Username <b><tt>'" . $username . "'</tt></b> is <b>valid</b> and <b>" . $usernamediff ."</b> existing entry.</p>";
                 $userflagdiff = !is_null($userinfo) && $userflag == $userinfo[2] ? "matches" : "differs from";
