@@ -1,3 +1,11 @@
+*.bak
+*~
+.directory
+.DS_Store
+*.orig
+*.rej
+*.bak
+*.kate-swp
 temp/*
 active.cfg
 auth.cfg

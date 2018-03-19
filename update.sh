@@ -29,6 +29,7 @@ AUTHFILE="${UPDDIR}/auth.cfg"
 
 AUTHPREV="${UPDTEMP}/prev.cfg"
 AUTHTEMP="${UPDTEMP}/auth.tmp"
+VIRTTEMP="${UPDTEMP}/virtual"
 SFTPFILE="${UPDTEMP}/sftp.cfg"
 MEMBFILE="${UPDTEMP}/members.cfg"
 PURGFILE="${UPDTEMP}/purge.cfg"
@@ -83,8 +84,8 @@ if [ -n "${DELLIST}" ]; then
                     grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
                     mv -f "${ACTVFILE}.int" "${ACTVFILE}"
                 done
-                grep -v " ${i}$" "${VIRTFILE}" > "${UPDTEMP}/virt.int"
-                mv -f "${UPDTEMP}/virt.int" "${VIRTFILE}"
+                grep -v " ${i}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
+                mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
                 echo "${i}" >> "${PURGFILE}"
             fi
         fi
@@ -130,8 +131,8 @@ if [ -e "${ADDUFILE}" ]; then
                         echo "[update: ${ADDCHKUSER} => ${ADDUSER} flags: ${ADDCHKFLAG} => ${ADDFLAG}]"
                         grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
                         mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
-                        grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${UPDTEMP}/virt.int"
-                        mv -f "${UPDTEMP}/virt.int" "${VIRTFILE}"
+                        grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
+                        mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
                         ADDPURGE=`echo "${ADDFIND}" | cut -d" " -f2 | tr "\n" " "`
                         for j in ${ADDPURGE}; do
                             grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
