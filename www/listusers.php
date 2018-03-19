@@ -1,19 +1,21 @@
 <?php
     $pagename = "List Users";
     include_once("/var/www/src/header.php");
+    include_once("../src/config.php");
+    include_once("../src/users.php");
 ?>
 <p>Below is a list of all users in the system.</p>
-<?php include_once("../src/loadusers.php") ?>
 <table>
     <thead><tr><th>Index</th><th>Handle</th><th>Flags</th><th>Email</th><th>Actions</th></tr></thead>
     <tbody>
         <?php
+            $userlist = load_users();
             $index = 1;
-            foreach ($users as $user) {
+            foreach ($userlist as $user) {
                 echo "<tr>";
                 echo "<td>" . $index . "</td>";
                 echo "<td><b>" . $user[1]. "</b></td>";
-                echo "<td>" . $user[2]. "</td>";
+                echo "<td><tt>" . $user[2]. "</tt></td>";
                 echo "<td><a href=\"mailto:" . $user[4] . "\">" . $user[4]. "</td>";
                 echo "<td>";
                 echo "<a href=\"adduser.php?mail=" . $user[4] . "&user=" . $user[1] . "&flag=" . $user[2] . "\">Modify User</a>";
