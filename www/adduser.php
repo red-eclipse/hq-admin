@@ -9,7 +9,6 @@
     $userbyname = user_byname($curuser['user']);
     if (!is_null($userinfo)) {
         if ($curuser['user'] == "") $curuser['user'] = $userbyname['user'];
-        $curuser['user'] = $userinfo['user'];
     } elseif (!is_null($userbyname)) { 
         if ($curuser['email'] == "") $curuser['email'] = $userbyname['email'];
         if(is_null($userinfo)) $userinfo = $userbyname;
