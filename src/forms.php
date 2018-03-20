@@ -12,7 +12,7 @@
             </form>
         <?php } else { ?>
             <?php if ($header != "" && !$after) echo "<h2>" . $header . "</h2>"; ?>
-            <p>Here you can add users to the system. You can modify a username or level by entering an existing email.</p>
+            <p>Here you can add users to the system. You can modify an existing account by entering a valid username or email.</p>
             <?php if ($header != "" && $after) echo "<h2>" . $header . "</h2>"; ?>
             <form action="adduser.php" method="get" autocomplete="off">
                 <p><tt>&nbsp;EMAIL:</tt> <input type="text" name="mail" value="<?php echo $curuser['email']; ?>" style="width: 300px"></p>
