@@ -6,6 +6,14 @@
     $curuser['level'] = $_GET['level'] ?? "";
     $issubmit = $_GET['submit'] ?? "";
     $userinfo = user_byemail($curuser['email']);
+    $userbyname = user_byname($curuser['user']);
+    if (!is_null($userinfo)) {
+        if ($curuser['user'] == "") $curuser['user'] = $userbyname['user'];
+        $curuser['user'] = $userinfo['user'];
+    } elseif (!is_null($userbyname)) { 
+        if ($curuser['email'] == "") $curuser['email'] = $userbyname['email'];
+        if(is_null($userinfo)) $userinfo = $userbyname;
+    }
     if ($curuser['level'] == "") {
         if(is_null($userinfo) || !preg_match("/^[usmoadc]$/", $userinfo['level'])) {
             $curuser['level'] = "u";
@@ -19,11 +27,10 @@
         if (!stristr($curuser['email'], "redeclipse.net") && preg_match("/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i", $curuser['email'])) {
             echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Email <b><tt>'" . $curuser['email'] . "'</tt></b> is <b>valid</b>.</p>";
             if (preg_match("/^[a-z][a-z0-9]+$/", $curuser['user'])) {
-                $userbyname = user_byname($curuser['user']);
                 if (is_null($userbyname) || $userbyname['email'] == $curuser['email']) {
                     if (preg_match("/^[usmoadc]$/", $curuser['level'])) {
                         if (!is_null($userinfo)) {
-                            echo "<p><tt>&nbsp;&nbsp;USER:</tt> Found existing user <b><tt>'" . $userinfo['user'] . "'</tt></b> with level <b>" . user_icon($userinfo['level']) . "</b> matching <b><tt>'" . $curuser['email'] . "'</tt></b> in the database.</p>";
+                            echo "<p><tt>&nbsp;&nbsp;USER:</tt> Found existing user <b><tt>'" . $userinfo['user'] . "'</tt></b> in the database.</p>";
                             if ($curuser['user'] == $userinfo['user']) {
                                 echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Username <b><tt>'" . $curuser['user'] . "'</tt></b> is <b>valid</b> and <b>matches</b> the existing entry.</p>";
                             } else {
@@ -66,7 +73,7 @@
             echo "<p><tt>&nbsp;&nbsp;FAIL:</tt> Email <b><tt>'" . $curuser['email'] . "'</tt></b> is <b>invalid</b>.</p>";
         }
     } else {
-        echo "<p><tt>&nbsp;&nbsp;NOTE:</tt> The paramaters <b><tt>EMAIL</tt></b>, <b><tt>USER</tt></b>, and <b><tt>LEVEL</tt></b> are all required.</p>";
+        echo "<p><tt>&nbsp;&nbsp;NOTE:</tt> The paramaters <b><tt>EMAIL</tt></b> or <b><tt>USER</tt></b> are required.</p>";
     }
     include_once("footer.php");
 ?>
