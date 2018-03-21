@@ -47,15 +47,49 @@ AUTHSTR=("1" "2" "3" "4" "5" "6" "7" "8" "9" "0" "q" "w" "e" "r" "t" "y" "u" "i"
 sort -b "${AUTHFILE}" > "${AUTHTEMP}"
 
 DELCOUNT=0
-BOUNCES=`grep "^.*to=<.*status=bounced.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net"`
-DELLIST="${BOUNCES}"
+process_delete() {
+    DELLIST=`echo "${2}" | sed -e "s/ \([ ]*\)/ /g;s/^ //g;s/ $//g"`
+    for i in ${DELLIST}; do
+        if [ -n "${i}" ]; then
+            DELLINE=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${i}$" "${AUTHTEMP}"`
+            if [ -n "${DELLINE}" ]; then
+                DELUSER=`echo "${DELLINE}" | cut -d" " -f2`
+                DELSKIP=0
+                if [ "${1}" != "delete" ]; then
+                    DELFLAG=`echo "${DELLINE}" | cut -d" " -f3`
+                    if [ "${DELFLAG}" != "u" ] && [ "${DELFLAG}" != "s" ]; then
+                        echo "NOTICE: '${1}' for ${DELUSER} <${i}> but flag '${DELFLAG}' prevents deletion."
+                        DELSKIP=1
+                    fi
+                fi
+                if [ "${DELSKIP}" = 0 ]; then
+                    echo "Removing: ${DELUSER} <${i}> (${1})"
+                    grep -v "^addauth ${DELUSER} " "${AUTHTEMP}" > "${AUTHTEMP}.int"
+                    mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
+                    grep -v "^${DELUSER}$" "${ACTVFILE}" > "${ACTVFILE}.int"
+                    mv -f "${ACTVFILE}.int" "${ACTVFILE}"
+                    grep -v " ${i}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
+                    mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
+                    echo "${i}" >> "${PURGFILE}"
+                    DELCOUNT=$(( DELCOUNT + 1 ))
+                fi
+            fi
+        fi
+    done
+}
 
 if [ -e "${DELUFILE}" ]; then
     DELREQS=`cat "${DELUFILE}" | tr "\n" " "`
     if [ -n "${DELREQS}" ]; then
-        DELLIST="${DELLIST} ${DELREQS}"
+        echo "Processing deletion requests..."
+        process_delete "delete" "${DELREQS}"
     fi
-    echo "Processing deletion requests..."
+    rm -f "${DELUFILE}"
+fi
+
+BOUNCES=`grep "^.*to=<.*status=bounced.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net"`
+if [ -n "${BOUNCES}" ]; then
+    process_delete "bounce" "${BOUNCES}"
 fi
 
 EXPIRES=`grep "status=expired" /var/log/mail.log | cut -d" " -f6 | sed -e "s/^\([^:]*\):$/\1/"`
@@ -63,41 +97,15 @@ if [ -n "${EXPIRES}" ]; then
     for i in ${EXPIRES}; do
         EXPIRED=`grep "^.* ${i}: to=<.*>.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net" | tail -n 1`
         if [ -n "${EXPIRED}" ]; then
-            DELLIST="${DELLIST} ${EXPIRED}"
+            process_delete "expire" "${EXPIRED}"
         fi
     done
 fi
-DELLIST=`echo "${DELLIST}" | sed -e "s/ \([ ]*\)/ /g;s/^ //g;s/ $//g"`
 
-rm -f "${PURGFILE}"
-if [ -n "${DELLIST}" ]; then
-    for i in ${DELLIST}; do
-        if [ -n "${i}" ]; then
-            DELLINE=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${i}$" "${AUTHTEMP}"`
-            if [ -n "${DELLINE}" ]; then
-                DELUSER=`echo "${DELLINE}" | cut -d" " -f2 | tr "\n" " "`
-                for j in ${DELUSER}; do
-                    DELCOUNT=$(( DELCOUNT + 1 ))
-                    echo "Removing: ${j} <${i}> (${DELCOUNT})"
-                    grep -v "^addauth ${j} " "${AUTHTEMP}" > "${AUTHTEMP}.int"
-                    mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
-                    grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
-                    mv -f "${ACTVFILE}.int" "${ACTVFILE}"
-                done
-                grep -v " ${i}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
-                mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
-                echo "${i}" >> "${PURGFILE}"
-            fi
-        fi
-    done
-    if [ "${DELCOUNT}" -gt "0" ]; then
-        echo "Purging ${DELCOUNT} user(s)..."
-        /usr/sbin/remove_members --fromall --nouserack --file="${PURGFILE}"
-        rm -f "${PURGFILE}"
-    fi
-    if [ -e "${DELUFILE}" ]; then
-        rm -f "${DELUFILE}"
-    fi
+if [ "${DELCOUNT}" -gt 0 ]; then
+    echo "Purging ${DELCOUNT} user(s)..."
+    /usr/sbin/remove_members --fromall --nouserack --file="${PURGFILE}"
+    rm -f "${PURGFILE}"
 fi
 
 ADDCOUNT=0
@@ -128,7 +136,7 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
                     if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        echo "[update: ${ADDCHKUSER} -> ${ADDUSER} flags: ${ADDCHKFLAG} -> ${ADDFLAG}]"
+                        echo "[update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}]"
                         grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
                         mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
                         grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
@@ -174,12 +182,10 @@ if [ -e "${ADDUFILE}" ]; then
             fi
         done
     fi
-    if [ "${ADDCOUNT}" -gt "0" ]; then
+    if [ "${ADDCOUNT}" -gt 0 ]; then
         echo "Added ${ADDCOUNT} user(s)..."
     fi
-    if [ -e "${ADDUFILE}" ]; then
-        rm -f "${ADDUFILE}"
-    fi
+    rm -f "${ADDUFILE}"
 fi
 
 AUTHDIFF=`diff "${AUTHTEMP}" "${AUTHPREV}"`
@@ -218,7 +224,7 @@ if [ -n "${USERLIST}" ]; then
     fi
 fi
 
-if [ "${DELCOUNT}" -gt "0" ] || [ "${PRGCOUNT}" -gt "0" ] || [ "${USERCOUNT}" -gt 0 ]; then
+if [ "${DELCOUNT}" -gt 0 ] || [ "${PRGCOUNT}" -gt 0 ] || [ "${USERCOUNT}" -gt 0 ]; then
     /usr/sbin/postmap "${VIRTFILE}" && /usr/sbin/postfix reload
 fi
 
