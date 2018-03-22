@@ -44,11 +44,22 @@ RECMDS="killall -HUP redeclipse_server_linux"
 AUTHGEN="${UPDDIR}/genkey_linux"
 AUTHSTR=("1" "2" "3" "4" "5" "6" "7" "8" "9" "0" "q" "w" "e" "r" "t" "y" "u" "i" "o" "p" "a" "s" "d" "f" "g" "h" "j" "k" "l" "z" "x" "c" "v" "b" "n" "m" "Q" "W" "E" "R" "T" "Y" "U" "I" "O" "P" "A" "S" "D" "F" "G" "H" "J" "K" "L" "Z" "X" "C" "V" "B" "N" "M")
 
+sanitize_list() {
+    if [ -n "${1}" ]; then
+        SANITYIN="${1}"
+    else
+        read SANITYIN
+    fi
+    if [ -n "${SANITYIN}" ]; then
+        echo "${SANITYIN}" | sed -e "s/\t/ /g;s/ \([ ]*\)/ /g;s/^ //g;s/ $//g"
+    fi
+}
+
 sort -b "${AUTHFILE}" > "${AUTHTEMP}"
 
 DELCOUNT=0
 process_delete() {
-    DELLIST=`echo "${2}" | sed -e "s/ \([ ]*\)/ /g;s/^ //g;s/ $//g"`
+    DELLIST=`echo "${2}" | sanitize_list`
     for i in ${DELLIST}; do
         if [ -n "${i}" ]; then
             DELLINE=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${i}$" "${AUTHTEMP}"`
@@ -115,7 +126,7 @@ if [ -e "${ADDUFILE}" ]; then
     if [ -n "${a}" ]; then
         b=`echo "${a}" | wc -l`
         for (( c=0; ${c} < ${b}; c=$(( c + 1 )) )); do
-            ADDINPUT[${c}]=`echo "${a}" | sed -n "$(( c + 1 ))p" | sed -e "s/\t/ /g;s/ \([ ]*\)/ /g"`
+            ADDINPUT[${c}]=`echo "${a}" | sed -n "$(( c + 1 ))p" | sanitize_list`
         done
     fi
     if [ ${#ADDINPUT[@]} != 0 ]; then
@@ -136,12 +147,12 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
                     if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        echo "[update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}]"
+                        echo "update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}"
                         grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
                         mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
                         grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
                         mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
-                        ADDPURGE=`echo "${ADDFIND}" | cut -d" " -f2 | tr "\n" " "`
+                        ADDPURGE=`echo "${ADDFIND}" | cut -d" " -f2 | tr "\n" " " | sanitize_list`
                         for j in ${ADDPURGE}; do
                             grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
                             mv -f "${ACTVFILE}.int" "${ACTVFILE}"
@@ -150,7 +161,7 @@ if [ -e "${ADDUFILE}" ]; then
                         echo "${ADDUSER}@redeclipse.net ${ADDMAIL}" >> "${VIRTFILE}"
                         echo "${ADDUSER}" >> "${ACTVFILE}"
                     else
-                        echo "[email exists, skipping]"
+                        echo "email exists, skipping"
                         sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/exists" | ${SENDMAIL} "${ADDMAIL}"
                     fi
                 else
@@ -163,7 +174,7 @@ if [ -e "${ADDUFILE}" ]; then
                             ADDFIND=`grep "^addauth ${ADDUSER} " "${AUTHTEMP}"`
                             q=$(( q + 1 ))
                         done
-                        echo -n "[renamed to ${ADDUSER}] "
+                        echo -n "renamed to: ${ADDUSER} "
                     fi
                     w=""
                     x=$(( (RANDOM % 64) + 64 ))
@@ -174,7 +185,7 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDKEYS=`${AUTHGEN} "${w}" | cut -d" " -f3 | tr "\n" " "`
                     ADDUKEY=`echo "${ADDKEYS}" | cut -d" " -f1`
                     ADDSKEY=`echo "${ADDKEYS}" | cut -d" " -f2`
-                    echo "[generated keys]"
+                    echo "generated keys, adding user"
                     echo "addauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
                     sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~USERKEY~/${ADDUKEY}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/reply" | ${SENDMAIL} "${ADDMAIL}"
                     ADDCOUNT=$(( ADDCOUNT + 1 ))
@@ -205,7 +216,7 @@ if [ -n "${USERLIST}" ]; then
     rm -f "${MEMBFILE}"
     CURLINE=1
     while [ "${CURLINE}" -le "${NUMLINES}" ]; do
-        USERLINE=`echo "${USERLIST}" | sed -n "${CURLINE}p"`
+        USERLINE=`echo "${USERLIST}" | sed -n "${CURLINE}p" | sanitize_list`
         USERNAME=`echo "${USERLINE}" | cut -d" " -f1`
         USERMAIL=`echo "${USERLINE}" | cut -d" " -f2`
         USERACTV=`grep "^${USERNAME}$" "${ACTVFILE}"`
