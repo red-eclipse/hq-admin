@@ -51,4 +51,29 @@
             </form>
         <?php }
     }
+    function form_update($hidden = false, $after = true, $header = "", $curuser = NULL, $userkey = "") {
+        global $userattr, $userdefaults;
+        if(is_null($curuser)) $curuser = $userdefaults;
+        if ($hidden) { ?>
+            <?php if ($header != "") echo "<h3>" . $header . "</h3>"; ?>
+            <form action="index.php" method="get" autocomplete="off">
+                <input type="hidden" name="mail" value="<?php echo $curuser['email']; ?>">
+                <input type="hidden" name="user" value="<?php echo $curuser['user']; ?>">
+                <input type="hidden" name="sid" value="<?php echo $curuser['sid']; ?>">
+                <input type="hidden" name="key" value="<?php echo $userkey; ?>">
+                <p><tt>REALLY:</tt> <input type="submit" name="submit" value="Yes, Confirm Submission" style="width: 300px"></p>
+            </form>
+        <?php } else { ?>
+            <?php if ($header != "" && !$after) echo "<h2>" . $header . "</h2>"; ?>
+            <p>Here you can update your details in the system.</p>
+            <?php if ($header != "" && $after) echo "<h2>" . $header . "</h2>"; ?>
+            <form action="index.php" method="get" autocomplete="off">
+                <p><tt>&nbsp;EMAIL:</tt> <input type="text" name="mail" value="<?php echo $curuser['email']; ?>" style="width: 300px"></p>
+                <p><tt>&nbsp;&nbsp;USER:</tt> <input type="text" name="user" value="<?php echo $curuser['user']; ?>" style="width: 300px"></p>
+                <p><tt>&nbsp;STEAM:</tt> <input type="text" name="sid" value="<?php echo $curuser['sid']; ?>" style="width: 300px"> (this is for your SteamID)</p>
+                <p><tt>&nbsp;&nbsp;&nbsp;KEY:</tt> <input type="text" name="key" value="<?php echo $userkey; ?>" style="width: 300px"> (this is for your Red Eclipse password)</p>
+                <p><tt>SUBMIT:</tt> <input type="submit" value="Check Details" style="width: 300px"></p>
+            </form>
+        <?php }
+    }
 ?>

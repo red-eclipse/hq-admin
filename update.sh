@@ -171,10 +171,11 @@ if [ -e "${ADDUFILE}" ]; then
                 if [ -n "${ADDFIND}" ]; then
                     ADDCHKUSER=`echo "${ADDFIND}" | cut -d" " -f2 | tail -n 1`;
                     ADDCHKFLAG=`echo "${ADDFIND}" | cut -d" " -f3 | tail -n 1`;
+                    ADDCHKSID=`echo "${ADDFIND}" | cut -d" " -f6 | tail -n 1`;
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
-                    if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
+                    if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ] || [ "${ADDCHKSID}" != "${ADDSID}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        logtext "Update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}"
+                        logtext "Update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG} sid: ${ADDCHKSID} -> ${ADDSID}"
                         AUTHCACHE=`echo "${AUTHCACHE}" | grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL} \([^ ]*\)$"`
                         echo "${AUTHCACHE}" > "${AUTHTEMP}"
                         VIRTCACHE=`grep -v " ${ADDMAIL}$" "${VIRTFILE}"`
@@ -187,6 +188,7 @@ if [ -e "${ADDUFILE}" ]; then
                         AUTHCACHE=`echo -e "${AUTHCACHE}\naddauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL} ${ADDSID}"`
                         echo "${ADDUSER}@redeclipse.net ${ADDMAIL}" >> "${VIRTFILE}"
                         echo "${ADDUSER}" >> "${ACTVFILE}"
+                        ADDCOUNT=$(( ADDCOUNT + 1 ))
                     else
                         logtext "Skip: Email exists."
                         send_email "${UPDDIR}/mail/exists" "${ADDUSER}" "${ADDMAIL}"

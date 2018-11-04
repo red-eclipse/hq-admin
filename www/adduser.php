@@ -48,15 +48,16 @@
                             echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Username <b><tt>'" . $curuser['user'] . "'</tt></b> is <b>valid</b> and <b>has no</b> existing entry.</p>";
                             echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> Level <b>" . user_icon($curuser['level']) . "</b> is <b>set</b>.</p>";
                         }
+                        echo "<p><tt>&nbsp;&nbsp;&nbsp;&nbsp;OK:</tt> SteamID <b><tt>'" . $curuser['sid'] . "'</tt></b> is <b>set</b></p>";
                         if ($issubmit != "") {
-                            if(is_null($userinfo) || $curuser['user'] != $userinfo['user'] || $curuser['level'] != $userinfo['level']) {
+                            if(is_null($userinfo) || $curuser['user'] != $userinfo['user'] || $curuser['level'] != $userinfo['level'] || $curuser['sid'] != $userinfo['sid']) {
                                 $execstr = shell_exec("echo '" . escapeshellcmd($curuser['email']) . " " . escapeshellcmd($curuser['user']) . " " . escapeshellcmd($curuser['level']) ." " . escapeshellcmd($curuser['sid']) . "' >> /var/lib/reauth/temp/adduser.cfg && echo 'OK, submitted user successfully.' || echo 'FAILED, try again later.'");
                                 echo "<p><tt>&nbsp;&nbsp;&nbsp;RET:</tt> <b>" . $execstr . "</b></p>";
                             } else {
                                 echo "<p><tt>&nbsp;ERROR:</tt> Requested details <b>already match existing entry</b>.</p>";
                             }
                         } else {
-                            if(is_null($userinfo) || $curuser['user'] != $userinfo['user'] || $curuser['level'] != $userinfo['level']) {
+                            if(is_null($userinfo) || $curuser['user'] != $userinfo['user'] || $curuser['level'] != $userinfo['level'] || $curuser['sid'] != $userinfo['sid']) {
                                 form_adduser(true, false, "Confirm Details", $curuser);
                             } else {
                                 echo "<p><tt>&nbsp;&nbsp;NOTE:</tt> Requested details <b>already match existing entry</b>, edit above to make changes.</p>";

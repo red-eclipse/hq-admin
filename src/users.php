@@ -79,4 +79,9 @@
         }
         return NULL;
     }
+    function user_auth($id, $userkey) {
+        $execstr = exec("/var/lib/reauth/genkey_linux " . escapeshellcmd($id['key']) . " " . escapeshellcmd($userkey));
+        if ($execstr == "yes") return true;
+        return false;
+    }
 ?>
