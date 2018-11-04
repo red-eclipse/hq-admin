@@ -71,7 +71,7 @@
                 <p><tt>&nbsp;EMAIL:</tt> <input type="text" name="mail" value="<?php echo $curuser['email']; ?>" style="width: 300px"></p>
                 <p><tt>&nbsp;&nbsp;USER:</tt> <input type="text" name="user" value="<?php echo $curuser['user']; ?>" style="width: 300px"> (optional, it will be looked up)</p>
                 <p><tt>&nbsp;STEAM:</tt> <input type="text" name="sid" value="<?php echo $curuser['sid']; ?>" style="width: 300px"> (this is for your SteamID)</p>
-                <p><tt>&nbsp;&nbsp;&nbsp;KEY:</tt> <input type="text" name="key" value="<?php echo $userkey; ?>" style="width: 300px"> (this is for your Red Eclipse password)</p>
+                <p><tt>&nbsp;&nbsp;&nbsp;KEY:</tt> <input type="password" name="key" value="<?php echo $userkey; ?>" style="width: 300px"> (this is for your Red Eclipse password)</p>
                 <p><tt>SUBMIT:</tt> <input type="submit" value="Check Details" style="width: 300px"></p>
             </form>
         <?php }

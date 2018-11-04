@@ -11,8 +11,10 @@
     $userbyname = user_byname($curuser['user']);
     if (!is_null($userinfo)) {
         if ($curuser['user'] == "") $curuser['user'] = $userinfo['user'];
+        if ($curuser['sid'] == "") $curuser['sid'] = $userinfo['sid'];
     } elseif (!is_null($userbyname)) { 
         if ($curuser['email'] == "") $curuser['email'] = $userbyname['email'];
+        if ($curuser['sid'] == "") $curuser['sid'] = $userbyname['sid'];
         if(is_null($userinfo)) $userinfo = $userbyname;
     }
     if ($curuser['sid'] == "") { $curuser['sid'] = "0"; }
