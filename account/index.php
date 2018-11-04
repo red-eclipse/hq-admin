@@ -10,7 +10,7 @@
     $userinfo = user_byemail($curuser['email']);
     $userbyname = user_byname($curuser['user']);
     if (!is_null($userinfo)) {
-        if ($curuser['user'] == "") $curuser['user'] = $userbyname['user'];
+        if ($curuser['user'] == "") $curuser['user'] = $userinfo['user'];
     } elseif (!is_null($userbyname)) { 
         if ($curuser['email'] == "") $curuser['email'] = $userbyname['email'];
         if(is_null($userinfo)) $userinfo = $userbyname;
@@ -63,7 +63,7 @@
             echo "<p><tt>&nbsp;&nbsp;FAIL:</tt> Email <b><tt>'" . $curuser['email'] . "'</tt></b> is <b>invalid</b>.</p>";
         }
     } else {
-        echo "<p><tt>&nbsp;&nbsp;NOTE:</tt> The paramaters <b><tt>EMAIL</tt></b> or <b><tt>USER</tt></b> are required.</p>";
+        echo "<p><tt>&nbsp;&nbsp;NOTE:</tt> The paramaters <b><tt>EMAIL</tt></b> and <b><tt>USER</tt></b> are required.</p>";
     }
     include_once("footer.php");
 ?>

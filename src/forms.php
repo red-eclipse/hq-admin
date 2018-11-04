@@ -69,7 +69,7 @@
             <?php if ($header != "" && $after) echo "<h2>" . $header . "</h2>"; ?>
             <form action="index.php" method="get" autocomplete="off">
                 <p><tt>&nbsp;EMAIL:</tt> <input type="text" name="mail" value="<?php echo $curuser['email']; ?>" style="width: 300px"></p>
-                <p><tt>&nbsp;&nbsp;USER:</tt> <input type="text" name="user" value="<?php echo $curuser['user']; ?>" style="width: 300px"></p>
+                <p><tt>&nbsp;&nbsp;USER:</tt> <input type="text" name="user" value="<?php echo $curuser['user']; ?>" style="width: 300px"> (optional, it will be looked up)</p>
                 <p><tt>&nbsp;STEAM:</tt> <input type="text" name="sid" value="<?php echo $curuser['sid']; ?>" style="width: 300px"> (this is for your SteamID)</p>
                 <p><tt>&nbsp;&nbsp;&nbsp;KEY:</tt> <input type="text" name="key" value="<?php echo $userkey; ?>" style="width: 300px"> (this is for your Red Eclipse password)</p>
                 <p><tt>SUBMIT:</tt> <input type="submit" value="Check Details" style="width: 300px"></p>
