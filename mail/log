@@ -1,0 +1,21 @@
+MIME-Version: 1.0
+From: Red Eclipse HQ <root@hq.redeclipse.net>
+To: ~USERNAME~ <~USERMAIL~>
+Subject: Red Eclipse Accounts Log - ~DATE~
+Content-type: multipart/alternative; boundary="~BOUNDARY~"
+
+--~BOUNDARY~
+Content-type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
+
+Accounts log for ~DATE~:
+
+~PLAINTEXT~
+
+--~BOUNDARY~
+Content-type: text/html; charset="UTF-8"; format=flowed; delsp=yes
+
+<p>Accounts log for ~DATE~:</p>
+
+<p><code>
+~HTMLTEXT~
+</code></p>

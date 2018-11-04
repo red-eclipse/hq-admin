@@ -1,4 +1,5 @@
 <?php
+    include_once("/var/www/src/common.php");
     $site['pagename'] = "Admin Area";
     include_once("../src/auth.php");
     echo "<p>Welcome to the Red Eclipse Administrator interface.</p>";

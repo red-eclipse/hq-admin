@@ -9,8 +9,8 @@
         'c' => array('name' => "Founder",       'lower' => "founder",       'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/founder.png"),
     );
     $users = NULL;
-    $userattrs = array('addauth', 'user', 'level', 'key', 'email');
-    $userdefaults = array('addauth' => "", 'user' => "", 'level' => "", 'key' => "", 'email' => "");
+    $userattrs = array('addauth', 'user', 'level', 'key', 'email', 'sid');
+    $userdefaults = array('addauth' => "", 'user' => "", 'level' => "", 'key' => "", 'email' => "", 'sid' => "");
     function user_text($level = 'u') {
         global $userattr;
         return "<span class=\"priv-" . $userattr[$level]['lower'] . "\">" . $userattr[$level]['name'] . "</span>";
@@ -37,7 +37,7 @@
         $handle = fopen($site['authcfg'], "r");
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                if (preg_match("/^addauth ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)$/", $line)) {
+                if (preg_match("/^addauth ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)$/", $line)) {
                     $userload = user_process(explode(" ", trim($line)));
                     if (!is_null($userload)) $users[$userload['user']] = $userload;
                 }
@@ -53,7 +53,7 @@
             $handle = fopen($site['authcfg'], "r");
             if ($handle) {
                 while (($line = fgets($handle)) !== false) {
-                    if (preg_match("/^addauth " . $name . " ([^ ]*) ([^ ]*) ([^ ]*)$/", $line)) {
+                    if (preg_match("/^addauth " . $name . " ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)$/", $line)) {
                         $userload = user_process(explode(" ", trim($line)));
                         if (!is_null($userload)) $users[$userload['user']] = $userload;
                         return $users[$userload['user']];
@@ -69,7 +69,7 @@
             $handle = fopen($site['authcfg'], "r");
             if ($handle) {
                 while (($line = fgets($handle)) !== false) {
-                    if (preg_match("/^addauth ([^ ]*) ([^ ]*) ([^ ]*) " . $name . "$/", $line)) {
+                    if (preg_match("/^addauth ([^ ]*) ([^ ]*) ([^ ]*) " . $name . " ([^ ]*)$/", $line)) {
                         $userload = user_process(explode(" ", trim($line)));
                         if (!is_null($userload)) $users[$userload['user']] = $userload;
                         return $users[$userload['user']];

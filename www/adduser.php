@@ -1,8 +1,10 @@
 <?php
-    $site['pagename'] = "Add User";
+    include_once("/var/www/src/common.php");
+    $site['pagename'] = "Admin: Add User";
     include_once("../src/auth.php");
     $curuser['email'] = $_GET['mail'] ?? "";
     $curuser['user'] = $_GET['user'] ?? "";
+    $curuser['sid'] = $_GET['sid'] ?? "";
     $curuser['level'] = $_GET['level'] ?? "";
     $issubmit = $_GET['submit'] ?? "";
     $userinfo = user_byemail($curuser['email']);
@@ -20,6 +22,7 @@
             $curuser['level'] = $userinfo['level'];
         }
     }
+    if ($curuser['sid'] == "") { $curuser['sid'] = "0"; }
     form_adduser(false, true, "Input", $curuser);
     if ($curuser['email'] != "" && $curuser['user'] != "") {
         echo "<h2>Output</h2>";
@@ -47,7 +50,7 @@
                         }
                         if ($issubmit != "") {
                             if(is_null($userinfo) || $curuser['user'] != $userinfo['user'] || $curuser['level'] != $userinfo['level']) {
-                                $execstr = shell_exec("echo '" . escapeshellcmd($curuser['email']) . " " . escapeshellcmd($curuser['user']) . " " . escapeshellcmd($curuser['level']) ."' >> /var/lib/reauth/temp/adduser.cfg && echo 'OK, submitted user successfully.' || echo 'FAILED, try again later.'");
+                                $execstr = shell_exec("echo '" . escapeshellcmd($curuser['email']) . " " . escapeshellcmd($curuser['user']) . " " . escapeshellcmd($curuser['level']) ." " . escapeshellcmd($curuser['sid']) . "' >> /var/lib/reauth/temp/adduser.cfg && echo 'OK, submitted user successfully.' || echo 'FAILED, try again later.'");
                                 echo "<p><tt>&nbsp;&nbsp;&nbsp;RET:</tt> <b>" . $execstr . "</b></p>";
                             } else {
                                 echo "<p><tt>&nbsp;ERROR:</tt> Requested details <b>already match existing entry</b>.</p>";

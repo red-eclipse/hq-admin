@@ -8,6 +8,7 @@
                 <input type="hidden" name="mail" value="<?php echo $curuser['email']; ?>">
                 <input type="hidden" name="user" value="<?php echo $curuser['user']; ?>">
                 <input type="hidden" name="level" value="<?php echo $curuser['level']; ?>">
+                <input type="hidden" name="sid" value="<?php echo $curuser['sid']; ?>">
                 <p><tt>REALLY:</tt> <input type="submit" name="submit" value="Yes, Confirm Submission" style="width: 300px"></p>
             </form>
         <?php } else { ?>
@@ -17,6 +18,7 @@
             <form action="adduser.php" method="get" autocomplete="off">
                 <p><tt>&nbsp;EMAIL:</tt> <input type="text" name="mail" value="<?php echo $curuser['email']; ?>" style="width: 300px"></p>
                 <p><tt>&nbsp;&nbsp;USER:</tt> <input type="text" name="user" value="<?php echo $curuser['user']; ?>" style="width: 300px"></p>
+                <p><tt>&nbsp;STEAM:</tt> <input type="text" name="sid" value="<?php echo $curuser['sid']; ?>" style="width: 300px"></p>
                 <p><tt>&nbsp;LEVEL:</tt>
                     <label class="radiobox"><input type="radio" name="level" value="u" <?php if($curuser['level'] == "u") echo "checked" ?>><span class="radiomark"></span><span class="radiolabel"><?php echo user_text('u'); ?></span></label>
                     <label class="radiobox"><input type="radio" name="level" value="s" <?php if($curuser['level'] == "s") echo "checked" ?>><span class="radiomark"></span><span class="radiolabel"><?php echo user_text('s'); ?></span></label>

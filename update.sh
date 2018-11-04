@@ -4,6 +4,7 @@ umask 007
 
 UPDDIR=$(dirname "${0}")
 UPDTEMP="${UPDDIR}/temp"
+UPDLOG="${UPDTEMP}/log.txt"
 
 . "${UPDDIR}/private.sh"
 
@@ -44,6 +45,17 @@ RECMDS="killall -HUP redeclipse_server_linux"
 AUTHGEN="${UPDDIR}/genkey_linux"
 AUTHSTR=("1" "2" "3" "4" "5" "6" "7" "8" "9" "0" "q" "w" "e" "r" "t" "y" "u" "i" "o" "p" "a" "s" "d" "f" "g" "h" "j" "k" "l" "z" "x" "c" "v" "b" "n" "m" "Q" "W" "E" "R" "T" "Y" "U" "I" "O" "P" "A" "S" "D" "F" "G" "H" "J" "K" "L" "Z" "X" "C" "V" "B" "N" "M")
 
+logtext() {
+    LOGDATE=$(date "+%b %d %X")
+    if [ -n "${1}" ]; then
+        LOGTEXT="${1}"
+    else
+        read LOGTEXT
+    fi
+    echo "${LOGTEXT}"
+    echo "${LOGDATE} ${LOGTEXT}" >> "${UPDLOG}"
+}
+
 sanitize_list() {
     if [ -n "${1}" ]; then
         SANITYIN="${1}"
@@ -55,33 +67,44 @@ sanitize_list() {
     fi
 }
 
-sort -b "${AUTHFILE}" > "${AUTHTEMP}"
+send_email() {
+    EMAILDATE=$(date | sed -e 's/  / /g')
+    EMAILBOUND=$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)
+    EMAILSED="s/~USERNAME~/${2}/g;s/~USERMAIL~/${3}/g;s/~DATE~/${EMAILDATE}/g;s/~BOUNDARY~/${EMAILBOUND}/g"
+    if [ -n "${4}" ]; then
+        EMAILSED="${EMAILSED};${4}"
+    fi
+    sed -e "${EMAILSED}" "${1}" | ${SENDMAIL} "${3}" 2>&1 | logtext
+}
+
+AUTHCACHE=`cat "${AUTHFILE}"`
+echo "${AUTHCACHE}" > "${AUTHTEMP}"
 
 DELCOUNT=0
 process_delete() {
-    DELLIST=`echo "${2}" | sanitize_list`
+    DELLIST=`echo "${2}" | sanitize_list | sort | uniq`
     for i in ${DELLIST}; do
         if [ -n "${i}" ]; then
-            DELLINE=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${i}$" "${AUTHTEMP}"`
+            DELLINE=`echo "${AUTHCACHE}" | grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${i} \([^ ]*\)$"`
             if [ -n "${DELLINE}" ]; then
                 DELUSER=`echo "${DELLINE}" | cut -d" " -f2`
                 DELSKIP=0
                 if [ "${1}" != "delete" ]; then
                     DELFLAG=`echo "${DELLINE}" | cut -d" " -f3`
                     if [ "${DELFLAG}" != "u" ] && [ "${DELFLAG}" != "s" ]; then
-                        echo "NOTICE: '${1}' for ${DELUSER} <${i}> but flag '${DELFLAG}' prevents deletion."
+                        #logtext "NOTICE: '${1}' for ${DELUSER} <${i}> but flag '${DELFLAG}' prevents deletion."
                         DELSKIP=1
                     fi
                 fi
                 if [ "${DELSKIP}" = 0 ]; then
-                    echo "Removing: ${DELUSER} <${i}> (${1})"
-                    grep -v "^addauth ${DELUSER} " "${AUTHTEMP}" > "${AUTHTEMP}.int"
-                    mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
-                    grep -v "^${DELUSER}$" "${ACTVFILE}" > "${ACTVFILE}.int"
-                    mv -f "${ACTVFILE}.int" "${ACTVFILE}"
-                    grep -v " ${i}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
-                    mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
-                    echo "${i}" >> "${PURGFILE}"
+                    logtext "Removing: ${DELUSER} <${i}> (${1})"
+                    AUTHCACHE=`echo "${AUTHCACHE}" | grep -v "^addauth ${DELUSER} "`
+                    echo "${AUTHCACHE}" > "${AUTHTEMP}"
+                    DELCACHE=`grep -v "^${DELUSER}$" "${ACTVFILE}"`
+                    echo "${DELCACHE}" > "${ACTVFILE}"
+                    VIRTCACHE=`grep -v " ${i}$" "${VIRTFILE}"`
+                    echo "${VIRTCACHE}" > "${VIRTFILE}"
+                    logtext "${i}" >> "${PURGFILE}"
                     DELCOUNT=$(( DELCOUNT + 1 ))
                 fi
             fi
@@ -92,21 +115,21 @@ process_delete() {
 if [ -e "${DELUFILE}" ]; then
     DELREQS=`cat "${DELUFILE}" | tr "\n" " "`
     if [ -n "${DELREQS}" ]; then
-        echo "Processing deletion requests..."
+        logtext "Processing deletion requests..."
         process_delete "delete" "${DELREQS}"
     fi
     rm -f "${DELUFILE}"
 fi
 
-BOUNCES=`grep "^.*to=<.*status=bounced.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net"`
+BOUNCES=`grep "^.*to=<.*status=bounced.*$" "/var/log/mail.log" | grep -v "[Ss][Pp][Aa][Mm]" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net"`
 if [ -n "${BOUNCES}" ]; then
     process_delete "bounce" "${BOUNCES}"
 fi
 
-EXPIRES=`grep "status=expired" /var/log/mail.log | cut -d" " -f6 | sed -e "s/^\([^:]*\):$/\1/"`
+EXPIRES=`grep "status=expired" /var/log/mail.log | grep -v "[Ss][Pp][Aa][Mm]" | cut -d" " -f6 | sed -e "s/^\([^:]*\):$/\1/" | sort | uniq`
 if [ -n "${EXPIRES}" ]; then
     for i in ${EXPIRES}; do
-        EXPIRED=`grep "^.* ${i}: to=<.*>.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net" | tail -n 1`
+        EXPIRED=`grep "^.* ${i}: to=<.*>.*$" "/var/log/mail.log" | sed -e "s/^.*to=<\([^>]*\)>.*$/\1/" | grep "^\([^@]*\)@\([^.]*\).\(.*\)$" | grep -v "redeclipse.net"`
         if [ -n "${EXPIRED}" ]; then
             process_delete "expire" "${EXPIRED}"
         fi
@@ -114,15 +137,15 @@ if [ -n "${EXPIRES}" ]; then
 fi
 
 if [ "${DELCOUNT}" -gt 0 ]; then
-    echo "Purging ${DELCOUNT} user(s)..."
-    /usr/sbin/remove_members --fromall --nouserack --file="${PURGFILE}"
+    logtext "Purging ${DELCOUNT} user(s)..."
+    /usr/sbin/remove_members --fromall --nouserack --file="${PURGFILE}" 2>&1 | logtext
     rm -f "${PURGFILE}"
 fi
 
 ADDCOUNT=0
 PRGCOUNT=0
 if [ -e "${ADDUFILE}" ]; then
-    a=`cat "${ADDUFILE}"`
+    a=`cat "${ADDUFILE}" | sort | uniq`
     if [ -n "${a}" ]; then
         b=`echo "${a}" | wc -l`
         for (( c=0; ${c} < ${b}; c=$(( c + 1 )) )); do
@@ -139,42 +162,46 @@ if [ -e "${ADDUFILE}" ]; then
                 if [ -z "${ADDFLAG}" ]; then
                     ADDFLAG="u"
                 fi
-                echo -n "Checking: ${ADDUSER} (${ADDFLAG}) <${ADDMAIL}> "
-                ADDFIND=`grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}"`
+                ADDSID=`echo "${ADDLINE}" | cut -d" " -f4`
+                if [ -z "${ADDFLAG}" ]; then
+                    ADDSID="0"
+                fi
+                logtext "Checking: ${ADDUSER} (${ADDFLAG}) <${ADDMAIL}> "
+                ADDFIND=`echo "${AUTHCACHE}" | grep "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL} \([^ ]*\)$"`
                 if [ -n "${ADDFIND}" ]; then
                     ADDCHKUSER=`echo "${ADDFIND}" | cut -d" " -f2 | tail -n 1`;
                     ADDCHKFLAG=`echo "${ADDFIND}" | cut -d" " -f3 | tail -n 1`;
                     ADDSKEY=`echo "${ADDFIND}" | cut -d" " -f4 | tail -n 1`;
                     if [ "${ADDCHKUSER}" != "${ADDUSER}" ] || [ "${ADDCHKFLAG}" != "${ADDFLAG}" ]; then
                         PRGCOUNT=$(( PRGCOUNT + 1 ))
-                        echo "update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}"
-                        grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL}$" "${AUTHTEMP}" > "${AUTHTEMP}.int"
-                        mv -f "${AUTHTEMP}.int" "${AUTHTEMP}"
-                        grep -v " ${ADDMAIL}$" "${VIRTFILE}" > "${VIRTTEMP}.int"
-                        mv -f "${VIRTTEMP}.int" "${VIRTFILE}"
+                        logtext "Update: ${ADDCHKUSER} -> ${ADDUSER} flag: ${ADDCHKFLAG} -> ${ADDFLAG}"
+                        AUTHCACHE=`echo "${AUTHCACHE}" | grep -v "^addauth \([^ ]*\) \([^ ]*\) \([^ ]*\) ${ADDMAIL} \([^ ]*\)$"`
+                        echo "${AUTHCACHE}" > "${AUTHTEMP}"
+                        VIRTCACHE=`grep -v " ${ADDMAIL}$" "${VIRTFILE}"`
+                        echo "${VIRTCACHE}" > "${VIRTFILE}"
                         ADDPURGE=`echo "${ADDFIND}" | cut -d" " -f2 | tr "\n" " " | sanitize_list`
                         for j in ${ADDPURGE}; do
-                            grep -v "^${j}$" "${ACTVFILE}" > "${ACTVFILE}.int"
-                            mv -f "${ACTVFILE}.int" "${ACTVFILE}"
+                            DELCACHE=`grep -v "^${j}$" "${ACTVFILE}"`
+                            echo "${DELCACHE}" > "${ACTVFILE}"
                         done
-                        echo "addauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
+                        AUTHCACHE=`echo -e "${AUTHCACHE}\naddauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL} ${ADDSID}"`
                         echo "${ADDUSER}@redeclipse.net ${ADDMAIL}" >> "${VIRTFILE}"
                         echo "${ADDUSER}" >> "${ACTVFILE}"
                     else
-                        echo "email exists, skipping"
-                        sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/exists" | ${SENDMAIL} "${ADDMAIL}"
+                        logtext "Skip: Email exists."
+                        send_email "${UPDDIR}/mail/exists" "${ADDUSER}" "${ADDMAIL}"
                     fi
                 else
-                    ADDFIND=`grep "^addauth ${ADDUSER} " "${AUTHTEMP}"`
+                    ADDFIND=`echo "${AUTHCACHE}" | grep "^addauth ${ADDUSER} "`
                     if [ -n "${ADDFIND}" ]; then
                         q=1
                         r="${ADDUSER}"
                         while [ -n "${ADDFIND}" ]; do
                             ADDUSER="${r}${q}"
-                            ADDFIND=`grep "^addauth ${ADDUSER} " "${AUTHTEMP}"`
+                            ADDFIND=`echo "${AUTHCACHE}" | grep "^addauth ${ADDUSER} "`
                             q=$(( q + 1 ))
                         done
-                        echo -n "renamed to: ${ADDUSER} "
+                        logtext "Renamed to: ${ADDUSER} "
                     fi
                     w=""
                     x=$(( (RANDOM % 64) + 64 ))
@@ -185,32 +212,33 @@ if [ -e "${ADDUFILE}" ]; then
                     ADDKEYS=`${AUTHGEN} "${w}" | cut -d" " -f3 | tr "\n" " "`
                     ADDUKEY=`echo "${ADDKEYS}" | cut -d" " -f1`
                     ADDSKEY=`echo "${ADDKEYS}" | cut -d" " -f2`
-                    echo "generated keys, adding user"
-                    echo "addauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL}" >> "${AUTHTEMP}"
-                    sed -e "s/~USERNAME~/${ADDUSER}/g;s/~USERMAIL~/${ADDMAIL}/g;s/~USERKEY~/${ADDUKEY}/g;s/~BOUNDARY~/$(head -c 64 /dev/urandom | shasum | cut -d' ' -f1)/g" "${UPDDIR}/mail/reply" | ${SENDMAIL} "${ADDMAIL}"
+                    logtext "OK: Generated keys, adding user - ${ADDKEYS}"
+                    AUTHCACHE=`echo -e "${AUTHCACHE}\naddauth ${ADDUSER} ${ADDFLAG} ${ADDSKEY} ${ADDMAIL} ${ADDSID}"`
+                    send_email "${UPDDIR}/mail/reply" "${ADDUSER}" "${ADDMAIL}" "s/~USERKEY~/${ADDUKEY}/g"
                     ADDCOUNT=$(( ADDCOUNT + 1 ))
                 fi
             fi
         done
     fi
     if [ "${ADDCOUNT}" -gt 0 ]; then
-        echo "Added ${ADDCOUNT} user(s)..."
+        logtext "Added ${ADDCOUNT} user(s)..."
+        echo "${AUTHCACHE}" | sort | uniq > "${AUTHTEMP}"
     fi
     rm -f "${ADDUFILE}"
 fi
 
 AUTHDIFF=`diff "${AUTHTEMP}" "${AUTHPREV}"`
 if [ -n "${AUTHDIFF}" ]; then
-    echo "Transmitting updates..."
-    echo "${AUTHDIFF}"
-    sort -b "${AUTHTEMP}" > "${AUTHFILE}"
+    logtext "Transmitting updates..."
+    logtext "${AUTHDIFF}"
+    cp -fv "${AUTHTEMP}" "${AUTHFILE}"
     echo -e "put \"${AUTHFILE}\" \"${UPDAUTH}\"" > "${SFTPFILE}"
-    ${SFTPCONN} -b "${SFTPFILE}" "${UPDHOST}" && ${RESERVER} "${UPDHOST}" "${RECMDS}" && cp -f "${AUTHFILE}" "${AUTHPREV}"
+    ${SFTPCONN} -b "${SFTPFILE}" "${UPDHOST}" && ${RESERVER} "${UPDHOST}" "${RECMDS}" && cp -f "${AUTHFILE}" "${AUTHPREV}" 2>&1 | logtext
 fi
 rm -f "${AUTHTEMP}"
 
 USERCOUNT=0
-USERLIST=`grep "^addauth " "${AUTHFILE}" | sed -e "s/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\).*$/\2 \5/"`
+USERLIST=`echo "${AUTHCACHE}" | grep "^addauth " | sed -e "s/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\).*$/\2 \5/"`
 if [ -n "${USERLIST}" ]; then
     NUMLINES=`echo "${USERLIST}" | wc -l`
     rm -f "${MEMBFILE}"
@@ -221,7 +249,7 @@ if [ -n "${USERLIST}" ]; then
         USERMAIL=`echo "${USERLINE}" | cut -d" " -f2`
         USERACTV=`grep "^${USERNAME}$" "${ACTVFILE}"`
         if [ -z "${USERACTV}" ]; then
-            echo "New Member: ${USERNAME} <${USERMAIL}>"
+            logtext "New Member: ${USERNAME} <${USERMAIL}>"
             echo "${USERNAME}" >> "${ACTVFILE}"
             echo "${USERMAIL}" >> "${MEMBFILE}"
             echo "${USERNAME}@redeclipse.net ${USERMAIL}" >> "${VIRTFILE}"
@@ -230,13 +258,13 @@ if [ -n "${USERLIST}" ]; then
         CURLINE=$(( CURLINE + 1 ))
     done
     if [ "${USERCOUNT}" -gt 0 ]; then
-        echo "Processing ${USERCOUNT} user(s)..."
-        /usr/sbin/add_members -r "${MEMBFILE}" -w "n" "news"
+        logtext "Processing ${USERCOUNT} user(s)..."
+        /usr/sbin/add_members -r "${MEMBFILE}" -w "n" "news" 2>&1 | logtext
     fi
 fi
 
 if [ "${DELCOUNT}" -gt 0 ] || [ "${PRGCOUNT}" -gt 0 ] || [ "${USERCOUNT}" -gt 0 ]; then
-    /usr/sbin/postmap "${VIRTFILE}" && /usr/sbin/postfix reload
+    /usr/sbin/postmap "${VIRTFILE}" 2>&1 | logtext
 fi
 
 rm -f "${LOCKFILE}"

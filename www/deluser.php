@@ -1,5 +1,6 @@
 <?php
-    $site['pagename'] = "Delete User";
+    include_once("/var/www/src/common.php");
+    $site['pagename'] = "Admin: Delete User";
     include_once("../src/auth.php");
     $curuser['email'] = $_GET['mail'] ?? "";
     $issubmit = $_GET['submit'] ?? "";

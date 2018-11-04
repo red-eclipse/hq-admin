@@ -1,8 +1,9 @@
-MIME-Version: 1.0 
-From: Red Eclipse Team <contact@redeclipse.net> 
-To: ~USERNAME~ <~USERMAIL~> 
+MIME-Version: 1.0
+From: Red Eclipse Team <contact@redeclipse.net>
+Reply-To: Red Eclipse Team <contact@redeclipse.net>
+To: ~USERNAME~ <~USERMAIL~>
 Subject: Red Eclipse Account Application Failure Notification
-Content-type: multipart/alternative; boundary="~BOUNDARY~" 
+Content-type: multipart/alternative; boundary="~BOUNDARY~"
 
 --~BOUNDARY~
 Content-type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
@@ -15,6 +16,8 @@ If you have any questions, or you want to join the community, visit our Live Cha
 
 Red Eclipse Team | https://redeclipse.net/ | contact@redeclipse.net
 
+Sent: ~DATE~
+
 --~BOUNDARY~
 Content-type: text/html; charset="UTF-8"; format=flowed; delsp=yes
 
@@ -25,4 +28,6 @@ Content-type: text/html; charset="UTF-8"; format=flowed; delsp=yes
 <p>If you have any questions, or you want to join the community, visit our <b><a href="https://redeclipse.net/chat">Live Chat</a></b> on <a href="irc://chat.freenode.net/redeclipse"><b>chat.freenode.net</b> in <b>#redeclipse</b></a>, join in on our <b><a href="https://redeclipse.net/discuss">Discussions</a></b>, or email <b><a href="mailto:contact@redeclipse.net">contact@redeclipse.net</a></b>.</p>
 
 <p><b>Red Eclipse Team | <a href="https://redeclipse.net/">https://redeclipse.net/</a> | <a href="mailto:contact@redeclipse.net">contact@redeclipse.net</b></p>
+
+<p>Sent: ~DATE~</p>
 
