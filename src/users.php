@@ -1,12 +1,12 @@
 <?php
     $userattr = array (
-        'u' => array('name' => "Player",        'lower' => "player",        'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/player.png"),
-        's' => array('name' => "Supporter",     'lower' => "supporter",     'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/supporter.png"),
-        'm' => array('name' => "Moderator",     'lower' => "moderator",     'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/moderator.png"),
-        'o' => array('name' => "Operator",      'lower' => "operator",      'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/operator.png"),
-        'a' => array('name' => "Administrator", 'lower' => "administrator", 'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/administrator.png"),
-        'd' => array('name' => "Developer",     'lower' => "developer",     'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/developer.png"),
-        'c' => array('name' => "Founder",       'lower' => "founder",       'icon' => "https://raw.githubusercontent.com/red-eclipse/textures/master/privs/founder.png"),
+        'u' => array('name' => "Player",        'lower' => "player",        'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/player.png"),
+        's' => array('name' => "Supporter",     'lower' => "supporter",     'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/supporter.png"),
+        'm' => array('name' => "Moderator",     'lower' => "moderator",     'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/moderator.png"),
+        'o' => array('name' => "Operator",      'lower' => "operator",      'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/operator.png"),
+        'a' => array('name' => "Administrator", 'lower' => "administrator", 'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/administrator.png"),
+        'd' => array('name' => "Developer",     'lower' => "developer",     'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/developer.png"),
+        'c' => array('name' => "Founder",       'lower' => "founder",       'icon' => "https://raw.githubusercontent.com/redeclipse/textures/master/privs/founder.png"),
     );
     $users = NULL;
     $userattrs = array('addauth', 'user', 'level', 'key', 'email', 'sid');
